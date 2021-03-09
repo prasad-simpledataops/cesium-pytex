@@ -7,9 +7,13 @@
 import configparser
 import sys
 import getopt
-import util.pytexutil
 from pubsub.PubSubConsumer import PubSubConsumer
 from util import pytexutil
+
+CONFIG_GROUP_NAME='cesium'
+CONFIG_BASE_URL='base_url'
+CONFIG_TEX_ID='tex_id'
+CONFIG_TEX_PASSWORD='tex_password'
 
 
 def print_hi(name):
@@ -40,22 +44,25 @@ def get_config_file(argv):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
+    #Get the config
     configfile = 'config.properties';# get_config_file(sys.argv)
     print(f'Config file to use = {configfile}')
     config = configparser.ConfigParser()
     config.read(configfile);
-    login_response = pytexutil.login(config.get('cesium','base_url'),
-                    config.get('cesium','tex_id'),
-                config.get('cesium','tex_password'));
+
+    #extract the configs needed to login
+    base_url = config.get(CONFIG_GROUP_NAME, CONFIG_BASE_URL)
+    tex_id = config.get(CONFIG_GROUP_NAME, CONFIG_TEX_ID)
+    tex_password = config.get(CONFIG_GROUP_NAME, CONFIG_TEX_PASSWORD)
+
+    login_response = pytexutil.login(base_url, tex_id, tex_password)
 
     print(login_response)
+
     project_id = login_response['toTexTopicInfo']['topicAuthInfo']['authCreds']['PROJECT_ID']
     subscription_id = login_response['toTexTopicInfo']['topicAuthInfo']['authCreds']['SUBSCRIPTION_ID']
     consumer = PubSubConsumer(project_id, subscription_id)
     consumer.start_listener()
-
-
-
 
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
